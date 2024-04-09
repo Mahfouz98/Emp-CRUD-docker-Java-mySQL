@@ -42,12 +42,7 @@ jobs:
        eip: ${{ steps.EIP.outputs.ec2_address }}
      needs: [ Build ]
      steps: 
-      - name: Get Instance IP
-        id: EIP
-        run: |
-          terraform-bin output -raw instance_public_ip > ip_address.txt
-          echo "ec2_address=$(cat ip_address.txt)" >> $GITHUB_OUTPUT
-
+      
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -63,6 +58,13 @@ jobs:
       
       - name: Terraform Apply
         run: terraform apply --auto-approve
+      
+      - name: Get Instance IP
+        id: EIP
+        run: |
+          terraform-bin output -raw instance_public_ip > ip_address.txt
+          echo "ec2_address=$(cat ip_address.txt)" >> $GITHUB_OUTPUT
+
 
       - name: multiple command
         uses: appleboy/ssh-action@v1.0.3
