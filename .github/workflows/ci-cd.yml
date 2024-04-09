@@ -25,11 +25,15 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: mvn -DskipTests=true package --file pom.xml
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: my_java_app
-        path: target/employee-0.0.1-SNAPSHOT.jar
+    
+    - name: Build Docker image
+      run: docker build -t my_java_app:latest .
+
+    - name: Login to DockerHub
+      run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+    - name: Push Docker image
+      run: docker push my_java_app:latest
 
   Deploy:
      name: Provision aws infrastructure using Terraform
@@ -38,15 +42,15 @@ jobs:
        eip: ${{ steps.EIP.outputs.ec2_address }}
      needs: [ Build ]
      steps: 
+      - name: Get Instance IP
+        id: EIP
+        run: |
+          terraform-bin output -raw instance_public_ip > ip_address.txt
+          echo "ec2_address=$(cat ip_address.txt)" >> $GITHUB_OUTPUT
+
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: my_java_app
-          path: artifacts/
-       
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
     
@@ -60,21 +64,6 @@ jobs:
       - name: Terraform Apply
         run: terraform apply --auto-approve
 
-      - name: Get Instance IP
-        id: EIP
-        run: |
-          terraform-bin output -raw instance_public_ip > ip_address.txt
-          echo "ec2_address=$(cat ip_address.txt)" >> $GITHUB_OUTPUT
-      - name: copy file via ssh key
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          timeout: 120s
-          host: ${{ steps.EIP.outputs.ec2_address }}
-          username: ubuntu
-          port: 22
-          key: ${{ secrets.SSH_KEY_PATH }}
-          source: artifacts/
-          target: /home/ubuntu/app
       - name: multiple command
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -83,6 +72,5 @@ jobs:
           key: ${{ secrets.SSH_KEY_PATH }}
           port: 22
           script: |
-              sudo apt update
-              sudo apt install openjdk-17-jdk openjdk-17-jre -y
-              java -jar /home/ubuntu/app/artifacts/employee-0.0.1-SNAPSHOT.jar
+              docker pull my_java_app:latest
+              docker run --name test_container -d -p 80:80 my_java_app:latest

@@ -8,6 +8,7 @@ resource "aws_instance" "PublicEC2" {
   subnet_id = aws_subnet.public_subnet.id 
   vpc_security_group_ids = [aws_security_group.allow_ssh.id] 
   depends_on = [aws_vpc.demovpc, aws_subnet.public_subnet] 
+  user_data = "${file("Add-Docker.sh")}"
 }
 
 resource "aws_instance" "PrivateEC2" { 
@@ -25,3 +26,23 @@ resource "aws_instance" "PrivateEC2" {
   user_data = "${file("mysql_script.sh")}"
 }
 
+resource  "aws_eip" "my_eip"{
+
+    vpc = true
+    tags = {
+    Name = "MyEIP"
+    Environment = "Production"
+  }
+}
+
+# Associate eip to the ec2
+resource "aws_eip_association" "associate"{
+    instance_id=aws_instance.PublicEC2.id
+    allocation_id=aws_eip.my_eip.id
+}
+
+
+# output/print the eip
+output "instance_public_ip" {
+  value = aws_eip.my_eip.public_ip
+}
