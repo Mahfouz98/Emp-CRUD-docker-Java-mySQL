@@ -26,7 +26,7 @@ resource "aws_instance" "PrivateEC2" {
   user_data = "${file("mysql_script.sh")}"
 }
 
-resource  "aws_eip" "my_eip"{
+resource  "aws_eip" "instance_eip"{
 
     vpc = true
     tags = {
@@ -38,11 +38,11 @@ resource  "aws_eip" "my_eip"{
 # Associate eip to the ec2
 resource "aws_eip_association" "associate"{
     instance_id=aws_instance.PublicEC2.id
-    allocation_id=aws_eip.my_eip.id
+    allocation_id=aws_eip.instance_eip.id
 }
 
 
 # output/print the eip
 output "instance_public_ip" {
-  value = aws_eip.my_eip.public_ip
+  value = aws_eip.instance_eip.public_ip
 }
