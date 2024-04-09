@@ -27,7 +27,7 @@ jobs:
       run: mvn -DskipTests=true package --file pom.xml
     
     - name: Build Docker image
-      run: docker build -t my_java_app:latest .
+      run: docker build -t ahmedmahfouz/my_java_app:latest .
 
     - name: Login to DockerHub
       run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
