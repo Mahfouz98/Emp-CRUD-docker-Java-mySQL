@@ -33,7 +33,7 @@ jobs:
       run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
     - name: Push Docker image
-      run: docker push my_java_app:latest
+      run: docker push ahmedmahfouz/my_java_app:latest
 
   Deploy:
      name: Provision aws infrastructure using Terraform
@@ -72,5 +72,5 @@ jobs:
           key: ${{ secrets.SSH_KEY_PATH }}
           port: 22
           script: |
-              docker pull my_java_app:latest
-              docker run --name test_container -d -p 80:80 my_java_app:latest
+              docker pull ahmedmahfouz/my_java_app:latest
+              docker run --name test_container -d -p 80:80 ahmedmahfouz/my_java_app:latest
