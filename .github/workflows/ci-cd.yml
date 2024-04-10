@@ -74,7 +74,7 @@ jobs:
           key: ${{ secrets.SSH_KEY_PATH }}
           port: 22
           script: |
-              sleep 10
+              sleep 20
               sudo apt-get update
               sudo apt-get install ca-certificates curl
               sudo install -m 0755 -d /etc/apt/keyrings
