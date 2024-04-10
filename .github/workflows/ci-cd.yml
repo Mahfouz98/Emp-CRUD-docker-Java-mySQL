@@ -92,4 +92,4 @@ jobs:
           script: |
               sudo apt-get update
               sudo apt install openjdk-17-jdk openjdk-17-jre -y
-              java -jar /home/ubuntu/app/employee-0.0.1-SNAPSHOT.jar
+              sudo java -jar /home/ubuntu/app/employee-0.0.1-SNAPSHOT.jar
