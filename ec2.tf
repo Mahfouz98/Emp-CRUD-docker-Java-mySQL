@@ -8,8 +8,7 @@ resource "aws_instance" "PublicEC2" {
   subnet_id = aws_subnet.public_subnet.id 
   vpc_security_group_ids = [aws_security_group.allow_ssh.id] 
   depends_on = [aws_vpc.demovpc, aws_subnet.public_subnet] 
-  user_data = "${file("Add-Docker.sh")}"
-}
+ }
 
 resource "aws_instance" "PrivateEC2" { 
   ami = "ami-080e1f13689e07408"
